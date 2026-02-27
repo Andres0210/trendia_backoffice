@@ -9,7 +9,6 @@ interface Props {
 }
 
 export function CreateProductModal({ open, onOpenChange }: Props) {
-  // Cerrar con ESC + bloquear scroll
   useEffect(() => {
     if (!open) return;
 
@@ -29,31 +28,44 @@ export function CreateProductModal({ open, onOpenChange }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100]">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-background/70 backdrop-blur-sm"
         onClick={() => onOpenChange(false)}
       />
 
       {/* Modal */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-200">
-          
+        <div
+          className="
+          w-full max-w-lg
+          rounded-2xl
+          bg-card
+          border border-border
+          shadow-xl
+          animate-in fade-in zoom-in-95 duration-200
+        "
+        >
           {/* Header */}
-          <div className="flex items-start justify-between gap-4 px-6 py-5 border-b">
+          <div className="flex items-start justify-between px-6 py-5 border-b border-border">
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900">
+              <h2 className="text-lg font-semibold text-foreground">
                 Crear producto
               </h2>
-              <p className="text-sm text-zinc-600">
+              <p className="text-sm text-muted-foreground">
                 Completa la información básica.
               </p>
             </div>
 
             <button
               onClick={() => onOpenChange(false)}
-              className="h-9 w-9 rounded-lg hover:bg-zinc-100 grid place-items-center text-zinc-600"
+              className="
+                h-9 w-9 rounded-xl
+                hover:bg-muted
+                text-muted-foreground
+                transition
+              "
             >
               ✕
             </button>

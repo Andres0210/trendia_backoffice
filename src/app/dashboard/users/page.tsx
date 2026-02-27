@@ -14,15 +14,14 @@ import { useRouter } from "next/navigation";
 export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
-
-  const router = useRouter();
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
 
   const [openCreate, setOpenCreate] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
 
-  const limit = 10;
+  const router = useRouter();
   const queryClient = useQueryClient();
+  const limit = 10;
 
   const { data, isLoading, isError } = useUsers(page, limit);
 
@@ -31,16 +30,14 @@ export default function UsersPage() {
     const query = q.trim().toLowerCase();
 
     return items.filter((u) => {
-      const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.toLowerCase();
+      const fullName =
+        `${u.firstName ?? ""} ${u.lastName ?? ""}`.toLowerCase();
+
       const matchesQuery =
         !query ||
         fullName.includes(query) ||
-        String(u.phone ?? "")
-          .toLowerCase()
-          .includes(query) ||
-        String(u.email ?? "")
-          .toLowerCase()
-          .includes(query);
+        String(u.phone ?? "").toLowerCase().includes(query) ||
+        String(u.email ?? "").toLowerCase().includes(query);
 
       const matchesStatus =
         status === "all" ||
@@ -52,9 +49,8 @@ export default function UsersPage() {
   }, [data?.items, q, status]);
 
   const toggleMutation = useMutation({
-    mutationFn: async (u: User) => {
-      return u.isActive ? deactivateUser(u.id) : activateUser(u.id);
-    },
+    mutationFn: async (u: User) =>
+      u.isActive ? deactivateUser(u.id) : activateUser(u.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
@@ -70,74 +66,108 @@ export default function UsersPage() {
     [toggleMutation, router],
   );
 
-  if (isLoading) return <div className="p-6">Cargando...</div>;
-  if (isError) return <div className="p-6">Error cargando usuarios</div>;
+  if (isLoading)
+    return <div className="p-6 text-muted-foreground">Cargando...</div>;
+
+  if (isError)
+    return (
+      <div className="p-6 text-destructive">
+        Error cargando usuarios
+      </div>
+    );
 
   return (
     <div className="space-y-6">
+
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-primary">Usuarios</h1>
-          <p className="text-zinc-600 text-sm">
+          <h1 className="text-2xl font-semibold text-foreground">
+            Usuarios
+          </h1>
+          <p className="text-sm text-muted-foreground">
             Leads/clientes que llegan por WhatsApp y realizan compras.
           </p>
         </div>
 
         <button
-          className="
-          inline-flex
-           items-center
-            justify-center
-             rounded-xl
-              bg-[var(--create-button)]
-            hover:bg-[var(--create-button-hover)]
-             px-4
-              py-2
-               text-sm
-                font-medium
-                 text-white
-                   transition shadow-sm"
           onClick={() => setOpenCreate(true)}
+          className="
+            inline-flex items-center justify-center
+            rounded-xl
+            bg-primary
+            px-4 py-2
+            text-sm font-medium
+            text-primary-foreground
+            shadow-sm
+            transition hover:bg-primary/90
+          "
         >
           + Crear usuario
         </button>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200/70 p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="
+        bg-card
+        rounded-2xl
+        border border-border
+        p-4
+        flex flex-col gap-4
+        sm:flex-row sm:items-center sm:justify-between
+      ">
+
+        {/* Search */}
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Buscar por nombre, teléfono o email..."
-          className="w-full sm:max-w-sm rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-200"
+          className="
+            w-full sm:max-w-sm
+            rounded-xl
+            border border-input
+            bg-background
+            px-3 py-2
+            text-sm
+            outline-none
+            transition
+            focus:ring-2 focus:ring-ring
+          "
         />
 
-        <div className="flex items-center gap-3">
-          <div className="text-sm text-zinc-600">
-            <span className="font-medium text-zinc-900">
+        <div className="flex items-center gap-4 flex-wrap">
+
+          <div className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">
               {filteredItems.length}
             </span>{" "}
             usuarios en esta página
           </div>
 
-          <div className="inline-flex rounded-lg ring-1 ring-zinc-200/70 bg-white p-1">
+          {/* Status filter */}
+          <div className="
+            inline-flex
+            rounded-xl
+            border border-border
+            bg-background
+            p-1
+          ">
             {(["all", "active", "inactive"] as const).map((v) => (
               <button
                 key={v}
                 onClick={() => setStatus(v)}
                 className={[
-                  "px-3 py-1.5 text-xs rounded-md font-medium transition cursor-pointer",
+                  "px-3 py-1.5 text-xs rounded-lg font-medium transition",
                   status === v
-                    ? "bg-slate-900 text-white"
-                    : "text-zinc-700 hover:bg-zinc-100",
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted",
                 ].join(" ")}
               >
                 {v === "all"
                   ? "Todos"
                   : v === "active"
-                    ? "Activos"
-                    : "Inactivos"}
+                  ? "Activos"
+                  : "Inactivos"}
               </button>
             ))}
           </div>
@@ -146,25 +176,53 @@ export default function UsersPage() {
 
       {/* Table card */}
       {data && (
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-zinc-200/70 overflow-hidden">
-          <div className="p-4 border-b border-zinc-100">
-            <div className="text-sm font-medium text-zinc-900">Listado</div>
+        <div className="
+          bg-card
+          rounded-2xl
+          border border-border
+          overflow-hidden
+        ">
+
+          <div className="p-4 border-b border-border">
+            <div className="text-sm font-medium text-foreground">
+              Listado
+            </div>
           </div>
 
           <DataTable columns={cols} data={filteredItems} />
 
-          <div className="flex items-center justify-between p-4 border-t border-zinc-100">
-            <div className="text-sm text-zinc-600">
+          {/* Pagination */}
+          <div className="
+            flex items-center justify-between
+            p-4 border-t border-border
+          ">
+            <div className="text-sm text-muted-foreground">
               Página{" "}
-              <span className="font-medium text-zinc-900">{data.page}</span> de{" "}
-              <span className="font-medium text-zinc-900">{data.pages}</span>
+              <span className="font-medium text-foreground">
+                {data.page}
+              </span>{" "}
+              de{" "}
+              <span className="font-medium text-foreground">
+                {data.pages}
+              </span>
             </div>
 
             <div className="flex gap-2">
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="
+                  inline-flex items-center justify-center
+                  rounded-xl
+                  border border-border
+                  bg-background
+                  px-3 py-2
+                  text-sm font-medium
+                  text-foreground
+                  transition
+                  hover:bg-muted
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
               >
                 Anterior
               </button>
@@ -172,7 +230,18 @@ export default function UsersPage() {
               <button
                 disabled={page === data.pages}
                 onClick={() => setPage((p) => p + 1)}
-                className="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="
+                  inline-flex items-center justify-center
+                  rounded-xl
+                  border border-border
+                  bg-background
+                  px-3 py-2
+                  text-sm font-medium
+                  text-foreground
+                  transition
+                  hover:bg-muted
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
               >
                 Siguiente
               </button>
@@ -182,7 +251,10 @@ export default function UsersPage() {
       )}
 
       {/* Modales */}
-      <CreateUserModal open={openCreate} onOpenChange={setOpenCreate} />
+      <CreateUserModal
+        open={openCreate}
+        onOpenChange={setOpenCreate}
+      />
 
       <EditUserModal
         open={!!editUser}

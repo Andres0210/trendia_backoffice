@@ -18,12 +18,15 @@ export const userColumns = (actions: Actions): ColumnDef<User>[] => [
     cell: ({ row }) => {
       const u = row.original;
       const name = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim();
+
       return (
         <div className="min-w-[220px]">
-          <div className="font-medium text-zinc-900">
+          <div className="font-medium text-foreground">
             {name || "Sin nombre"}
           </div>
-          <div className="text-xs text-zinc-500">{u.phone}</div>
+          <div className="text-xs text-muted-foreground">
+            {u.phone ?? "—"}
+          </div>
         </div>
       );
     },
@@ -32,7 +35,9 @@ export const userColumns = (actions: Actions): ColumnDef<User>[] => [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
-      <span className="text-zinc-700">{row.original.email ?? "—"}</span>
+      <span className="text-muted-foreground">
+        {row.original.email ?? "—"}
+      </span>
     ),
   },
   {
@@ -40,20 +45,35 @@ export const userColumns = (actions: Actions): ColumnDef<User>[] => [
     header: "Tags",
     cell: ({ row }) => {
       const tags = row.original.tags ?? [];
-      if (!tags.length) return <span className="text-zinc-500">—</span>;
+
+      if (!tags.length)
+        return (
+          <span className="text-muted-foreground">—</span>
+        );
 
       return (
         <div className="flex flex-wrap gap-2">
           {tags.slice(0, 3).map((t) => (
             <span
               key={t}
-              className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 ring-1 ring-zinc-200/70"
+              className="
+                inline-flex items-center
+                rounded-full
+                bg-muted
+                px-2.5 py-1
+                text-xs font-medium
+                text-foreground
+                border border-border
+              "
             >
               {t}
             </span>
           ))}
+
           {tags.length > 3 && (
-            <span className="text-xs text-zinc-500">+{tags.length - 3}</span>
+            <span className="text-xs text-muted-foreground">
+              +{tags.length - 3}
+            </span>
           )}
         </div>
       );
@@ -64,13 +84,14 @@ export const userColumns = (actions: Actions): ColumnDef<User>[] => [
     header: "Estado",
     cell: ({ row }) => {
       const active = row.original.isActive;
+
       return (
         <span
           className={[
-            "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
+            "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border",
             active
-              ? "bg-emerald-100 text-emerald-700"
-              : "bg-zinc-200 text-zinc-600",
+              ? "bg-success/10 text-success border-success/20"
+              : "bg-destructive/10 text-destructive border-destructive/20",
           ].join(" ")}
         >
           {active ? "Activo" : "Inactivo"}
@@ -85,16 +106,17 @@ export const userColumns = (actions: Actions): ColumnDef<User>[] => [
       const u = row.original;
 
       const iconBtn =
-        "inline-flex h-9 w-9 items-center justify-center rounded-lg " +
-        "transition-all duration-150 active:scale-[0.95] cursor-pointer " +
-        "hover:bg-zinc-100";
+        "inline-flex h-9 w-9 items-center justify-center rounded-xl " +
+        "transition-all duration-150 active:scale-[0.95] " +
+        "hover:bg-muted border border-transparent";
 
       return (
         <div className="flex justify-end gap-2">
+
           <Tooltip text="Ver perfil">
             <button
               type="button"
-              className={iconBtn + " text-zinc-700"}
+              className={iconBtn + " text-muted-foreground hover:text-foreground"}
               onClick={() => actions.onView(u)}
               aria-label="Ver perfil"
             >
@@ -105,7 +127,7 @@ export const userColumns = (actions: Actions): ColumnDef<User>[] => [
           <Tooltip text="Editar">
             <button
               type="button"
-              className={iconBtn + " text-zinc-700"}
+              className={iconBtn + " text-muted-foreground hover:text-foreground"}
               onClick={() => actions.onEdit(u)}
               aria-label="Editar"
             >
@@ -119,8 +141,8 @@ export const userColumns = (actions: Actions): ColumnDef<User>[] => [
               className={[
                 iconBtn,
                 u.isActive
-                  ? "text-rose-600 hover:bg-rose-50"
-                  : "text-emerald-700 hover:bg-emerald-50",
+                  ? "text-destructive hover:bg-destructive/10 hover:border-destructive/20"
+                  : "text-success hover:bg-success/10 hover:border-success/20",
               ].join(" ")}
               onClick={() => actions.onToggleActive(u)}
               aria-label={u.isActive ? "Desactivar" : "Activar"}
@@ -132,6 +154,7 @@ export const userColumns = (actions: Actions): ColumnDef<User>[] => [
               )}
             </button>
           </Tooltip>
+
         </div>
       );
     },

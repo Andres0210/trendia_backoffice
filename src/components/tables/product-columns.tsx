@@ -22,7 +22,7 @@ export const productColumns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: () => <div className="text-right">Precio</div>,
+    header: () => <div className="text-right tabular-nums">Precio</div>,
     cell: ({ row }) => (
       <div className="text-right font-semibold text-primary tabular-nums">
         {money(row.original.price)}
@@ -31,7 +31,7 @@ export const productColumns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "cost",
-    header: () => <div className="text-right">Costo</div>,
+    header: () => <div className="text-right tabular-nums">Costo</div>,
     cell: ({ row }) => (
       <div className="text-right text-muted-foreground tabular-nums">
         {money(row.original.cost)}
@@ -40,7 +40,7 @@ export const productColumns: ColumnDef<Product>[] = [
   },
   {
     id: "profit",
-    header: () => <div className="text-right">Ganancia</div>,
+    header: () => <div className="text-right tabular-nums">Ganancia</div>,
     cell: ({ row }) => {
       const { price, cost } = row.original;
       const profit = price - cost;
@@ -49,7 +49,7 @@ export const productColumns: ColumnDef<Product>[] = [
         <div
           className={[
             "text-right font-semibold tabular-nums",
-            profit >= 0 ? "text-emerald-600" : "text-destructive",
+            profit >= 0 ? "text-success" : "text-destructive",
           ].join(" ")}
         >
           {money(profit)}

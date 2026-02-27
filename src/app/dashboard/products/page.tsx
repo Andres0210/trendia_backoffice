@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { DataTable } from "@/components/tables/data-table";
 import { productColumns } from "@/components/tables/product-columns";
@@ -18,40 +18,47 @@ export default function ProductsPage() {
 
   const limit = 10;
 
-  // Convertimos el status del UI a isActive (backend)
   const isActive =
     status === "all" ? undefined : status === "active" ? true : false;
-
-  // Si luego agregas filtro "en oferta", aquí va:
-  const isOnSale = undefined; // o true/false
 
   const { data, isLoading, isError } = useProducts(
     page,
     limit,
-    q.trim() ? q.trim() : undefined,
+    q.trim() || undefined,
     isActive,
-    isOnSale,
+    undefined
   );
 
   useEffect(() => {
-    const handler = (e: any) => {
-      setEditProduct(e.detail);
-    };
-
+    const handler = (e: any) => setEditProduct(e.detail);
     window.addEventListener("edit-product", handler);
     return () => window.removeEventListener("edit-product", handler);
   }, []);
 
-  if (isLoading) return <div className="p-6">Cargando...</div>;
-  if (isError) return <div className="p-6">Error cargando productos</div>;
+  if (isLoading)
+    return (
+      <div className="p-6 text-muted-foreground">
+        Cargando productos...
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="p-6 text-destructive">
+        Error cargando productos.
+      </div>
+    );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-primary">Productos</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            Productos
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Administra tu catálogo, precios y estado.
           </p>
         </div>
@@ -59,30 +66,30 @@ export default function ProductsPage() {
         <button
           onClick={() => setOpen(true)}
           className="
-    inline-flex items-center justify-center
-    gap-2
-    rounded-xl
-    bg-[var(--create-button)]
-    hover:bg-[var(--create-button-hover)]
-    px-5 py-2.5
-    text-sm font-semibold text-primary-foreground
-    shadow-lg shadow-primary/20
-    cursor-pointer
-    transition-all duration-200
-    hover:shadow-xl hover:shadow-primary/30
-    hover:-translate-y-0.5
-    active:scale-[0.98]
-    focus:outline-none focus:ring-2 focus:ring-ring
-  "
+            inline-flex items-center justify-center
+            rounded-xl
+            bg-primary
+            hover:bg-primary/90
+            px-5 py-2.5
+            text-sm font-semibold
+            text-primary-foreground
+            shadow-sm
+            transition-all duration-200 ease-out
+            hover:-translate-y-0.5
+            active:scale-[0.98]
+            focus:outline-none focus:ring-2 focus:ring-ring
+          "
         >
           + Crear producto
         </button>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="bg-card border border-border rounded-2xl shadow-sm p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+
             {/* Search */}
             <div className="relative w-full sm:w-80">
               <input
@@ -91,90 +98,72 @@ export default function ProductsPage() {
                 placeholder="Buscar por nombre o SKU…"
                 className="
                   w-full rounded-xl
-                  border border-border
+                  border border-input
                   bg-background
                   px-4 py-2.5
-                  text-sm
+                  text-sm text-foreground
                   outline-none
-                  focus:ring-2 focus:ring-primary/40
-                  focus:border-primary
                   transition
-                            "
+                  focus:ring-2 focus:ring-ring
+                "
               />
-              {q.length > 0 && (
-                <button
-                  onClick={() => setQ("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-200/60"
-                  aria-label="Limpiar búsqueda"
-                >
-                  Limpiar
-                </button>
-              )}
             </div>
 
-            {/* Status filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-zinc-600">Estado</span>
-              <div className="inline-flex rounded-lg border border-zinc-200 bg-white p-1">
-                <button
-                  onClick={() => setStatus("all")}
-                  className={[
-                    "px-3 py-1.5 text-xs rounded-md transition",
-                    status === "all"
-                      ? "bg-primary text-primary-foreground shadow shadow-primary/20"
-                      : "text-muted-foreground hover:bg-primary/5 hover:text-primary",
-                  ].join(" ")}
-                >
-                  Todos
-                </button>
-                <button
-                  onClick={() => setStatus("active")}
-                  className={[
-                    "px-3 py-1.5 text-xs rounded-md transition",
-                    status === "active"
-                      ? "bg-zinc-900 text-white"
-                      : "text-zinc-700 hover:bg-zinc-100",
-                  ].join(" ")}
-                >
-                  Activos
-                </button>
-                <button
-                  onClick={() => setStatus("inactive")}
-                  className={[
-                    "px-3 py-1.5 text-xs rounded-md transition",
-                    status === "inactive"
-                      ? "bg-zinc-900 text-white"
-                      : "text-zinc-700 hover:bg-zinc-100",
-                  ].join(" ")}
-                >
-                  Inactivos
-                </button>
+            {/* Status */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-medium text-muted-foreground">
+                Estado
+              </span>
+
+              <div className="inline-flex rounded-xl border border-border bg-background p-1">
+
+                {(["all", "active", "inactive"] as const).map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => setStatus(item)}
+                    className={[
+                      "px-3 py-1.5 text-xs rounded-lg transition-all duration-200",
+                      status === item
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted",
+                    ].join(" ")}
+                  >
+                    {item === "all"
+                      ? "Todos"
+                      : item === "active"
+                      ? "Activos"
+                      : "Inactivos"}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Count */}
-          <div className="text-sm text-zinc-600">
+          <div className="text-sm text-muted-foreground">
             Mostrando{" "}
-            <span className="font-medium text-zinc-900">
-              {data?.total ?? 0}
-            </span>
-            de{" "}
-            <span className="font-medium text-zinc-900">
+            <span className="font-semibold text-foreground">
               {data?.items?.length ?? 0}
             </span>{" "}
-            en esta página
+            de{" "}
+            <span className="font-semibold text-foreground">
+              {data?.total ?? 0}
+            </span>{" "}
+            productos
           </div>
         </div>
       </div>
 
-      {/* Table Card */}
+      {/* Table */}
       {data && (
         <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between p-4 border-b border-border">
+
+          <div className="flex items-center justify-between p-5 border-b border-border">
             <div>
-              <div className="text-sm font-medium text-zinc-900">Listado</div>
-              <div className="text-xs text-zinc-600">
+              <div className="text-sm font-semibold text-foreground">
+                Listado
+              </div>
+              <div className="text-xs text-muted-foreground">
                 Página {data.page} de {data.pages}
               </div>
             </div>
@@ -182,28 +171,32 @@ export default function ProductsPage() {
 
           <DataTable columns={productColumns} data={data.items} />
 
-          {/* Footer / pagination */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 border-t border-zinc-200">
-            <div className="text-sm text-zinc-600">
+          {/* Pagination */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-5 border-t border-border">
+            <div className="text-sm text-muted-foreground">
               Página{" "}
-              <span className="font-medium text-zinc-900">{data.page}</span> de{" "}
-              <span className="font-medium text-zinc-900">{data.pages}</span>
+              <span className="font-semibold text-foreground">
+                {data.page}
+              </span>{" "}
+              de{" "}
+              <span className="font-semibold text-foreground">
+                {data.pages}
+              </span>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 disabled={page === 1}
                 onClick={() => setPage((prev) => prev - 1)}
                 className="
-  px-4 py-2 text-sm
-  rounded-xl
-  border border-border
-  bg-background
-  hover:bg-primary/5
-  hover:text-primary
-  transition
-  disabled:opacity-40
-"
+                  px-4 py-2 text-sm
+                  rounded-xl
+                  border border-border
+                  bg-background
+                  hover:bg-muted
+                  transition
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                "
               >
                 Anterior
               </button>
@@ -211,7 +204,15 @@ export default function ProductsPage() {
               <button
                 disabled={page === data.pages}
                 onClick={() => setPage((prev) => prev + 1)}
-                className="px-3 py-2 text-sm rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="
+                  px-4 py-2 text-sm
+                  rounded-xl
+                  border border-border
+                  bg-background
+                  hover:bg-muted
+                  transition
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                "
               >
                 Siguiente
               </button>

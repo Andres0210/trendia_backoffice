@@ -35,7 +35,7 @@ interface Props {
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-1 text-xs text-red-600">{message}</p>;
+  return <p className="mt-1 text-xs text-destructive">{message}</p>;
 }
 
 const money = (n: number) => `$${(n ?? 0).toLocaleString("es-CO")}`;
@@ -76,7 +76,6 @@ export function CreateProductForm({ onSuccess }: Props) {
   });
 
   const onSubmit = (data: FormData) => {
-    // Limpieza de payload: no mandes strings vacíos ni undefined innecesarios
     const payload: any = {
       name: data.name,
       price: data.price,
@@ -94,35 +93,37 @@ export function CreateProductForm({ onSuccess }: Props) {
     mutation.mutate(payload);
   };
 
+  const inputBase =
+    "w-full rounded-xl border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring";
+
+  const inputError = "border-destructive bg-destructive/5";
+  const inputNormal = "border-input";
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Nombre */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-zinc-900">Nombre</label>
+        <label className="text-sm font-medium text-foreground">Nombre</label>
         <input
           placeholder="Ej: Espátula Ultrasónica Facial"
           {...register("name")}
-          className={[
-            "w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm text-zinc-900",
-            "outline-none focus:ring-2 focus:ring-zinc-200 focus:border-zinc-300",
-            errors.name ? "border-red-300 bg-red-50" : "border-zinc-200",
-          ].join(" ")}
+          className={`${inputBase} ${errors.name ? inputError : inputNormal}`}
         />
         <FieldError message={errors.name?.message} />
       </div>
 
       {/* Descripción */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-zinc-900">Descripción</label>
+        <label className="text-sm font-medium text-foreground">
+          Descripción
+        </label>
         <textarea
-          rows={6}
+          rows={5}
           placeholder="Descripción del producto (opcional)"
           {...register("description")}
-          className={[
-            "w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm text-zinc-900",
-            "outline-none focus:ring-2 focus:ring-zinc-200 focus:border-zinc-300",
-            errors.description ? "border-red-300 bg-red-50" : "border-zinc-200",
-          ].join(" ")}
+          className={`${inputBase} ${
+            errors.description ? inputError : inputNormal
+          }`}
         />
         <FieldError message={errors.description?.message} />
       </div>
@@ -130,158 +131,93 @@ export function CreateProductForm({ onSuccess }: Props) {
       {/* SKU + Stock */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-zinc-900">SKU</label>
+          <label className="text-sm font-medium text-foreground">SKU</label>
           <input
-            placeholder="Ej: TRE-001"
             {...register("sku")}
-            className={[
-              "w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm text-zinc-900",
-              "outline-none focus:ring-2 focus:ring-zinc-200 focus:border-zinc-300",
-              errors.sku ? "border-red-300 bg-red-50" : "border-zinc-200",
-            ].join(" ")}
+            className={`${inputBase} ${errors.sku ? inputError : inputNormal}`}
           />
-          <FieldError message={errors.sku?.message} />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-zinc-900">Stock</label>
+          <label className="text-sm font-medium text-foreground">Stock</label>
           <input
             type="number"
-            placeholder="Ej: 10"
             {...register("stock", { valueAsNumber: true })}
-            className={[
-              "w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm text-zinc-900",
-              "outline-none focus:ring-2 focus:ring-zinc-200 focus:border-zinc-300",
-              errors.stock ? "border-red-300 bg-red-50" : "border-zinc-200",
-            ].join(" ")}
+            className={`${inputBase} ${
+              errors.stock ? inputError : inputNormal
+            }`}
           />
           <FieldError message={errors.stock?.message} />
         </div>
       </div>
 
-      {/* Precio / compareAt / costo */}
+      {/* Precios */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-zinc-900">Precio</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-500">
-              $
-            </span>
+        {["price", "compareAtPrice", "cost"].map((field) => (
+          <div key={field} className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground capitalize">
+              {field === "compareAtPrice" ? "CompareAt" : field}
+            </label>
             <input
               type="number"
-              placeholder="0"
-              {...register("price", { valueAsNumber: true })}
-              className={[
-                "w-full rounded-lg border bg-zinc-50 pl-7 pr-3 py-2 text-sm text-zinc-900",
-                "outline-none focus:ring-2 focus:ring-zinc-200 focus:border-zinc-300",
-                errors.price ? "border-red-300 bg-red-50" : "border-zinc-200",
-              ].join(" ")}
+              {...register(field as any, { valueAsNumber: true })}
+              className={`${inputBase} ${
+                errors[field as keyof FormData] ? inputError : inputNormal
+              }`}
+            />
+            <FieldError
+              message={errors[field as keyof FormData]?.message as string}
             />
           </div>
-          <FieldError message={errors.price?.message} />
-        </div>
+        ))}
+      </div>
 
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-zinc-900">
-            CompareAt{" "}
-            <span className="text-zinc-500 font-normal">(opcional)</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-500">
-              $
-            </span>
-            <input
-              type="number"
-              placeholder="0"
-              {...register("compareAtPrice", { valueAsNumber: true })}
-              className={[
-                "w-full rounded-lg border bg-zinc-50 pl-7 pr-3 py-2 text-sm text-zinc-900",
-                "outline-none focus:ring-2 focus:ring-zinc-200 focus:border-zinc-300",
-                errors.compareAtPrice
-                  ? "border-red-300 bg-red-50"
-                  : "border-zinc-200",
-              ].join(" ")}
-            />
-          </div>
-          <FieldError message={errors.compareAtPrice?.message} />
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-zinc-900">Costo</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-500">
-              $
-            </span>
-            <input
-              type="number"
-              placeholder="0"
-              {...register("cost", { valueAsNumber: true })}
-              className={[
-                "w-full rounded-lg border bg-zinc-50 pl-7 pr-3 py-2 text-sm text-zinc-900",
-                "outline-none focus:ring-2 focus:ring-zinc-200 focus:border-zinc-300",
-                errors.cost ? "border-red-300 bg-red-50" : "border-zinc-200",
-              ].join(" ")}
-            />
-          </div>
-          <FieldError message={errors.cost?.message} />
+      {/* Resumen */}
+      <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Ganancia estimada</span>
+          <span
+            className={`font-semibold tabular-nums ${
+              profit >= 0 ? "text-success" : "text-destructive"
+            }`}
+          >
+            {money(profit)}
+          </span>
         </div>
       </div>
 
-      {/* Resumen + switches */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-zinc-200 bg-white p-3 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-zinc-600">Ganancia estimada</span>
-            <span
-              className={[
-                "font-semibold tabular-nums",
-                profit >= 0 ? "text-green-700" : "text-red-700",
-              ].join(" ")}
-            >
-              {money(profit)}
-            </span>
+      {/* Switches */}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-background p-4">
+        <div>
+          <div className="text-sm font-medium text-foreground">Activo</div>
+          <div className="text-xs text-muted-foreground">
+            Visible en el catálogo
           </div>
         </div>
-
-        <div className="rounded-xl border border-zinc-200 bg-white p-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium text-zinc-900">Activo</div>
-              <div className="text-xs text-zinc-500">
-                Visible en el catálogo
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              {...register("isActive")}
-              className="h-4 w-4 accent-zinc-900"
-            />
-          </div>
-
-          <div className="mt-3 flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium text-zinc-900">En oferta</div>
-              <div className="text-xs text-zinc-500">Marca promocional</div>
-            </div>
-            <input
-              type="checkbox"
-              {...register("isOnSale")}
-              className="h-4 w-4 accent-zinc-900"
-            />
-          </div>
-        </div>
+        <input
+          type="checkbox"
+          {...register("isActive")}
+          className="h-4 w-4 accent-primary"
+        />
       </div>
 
       <button
         type="submit"
         disabled={mutation.isPending}
-        className="w-full rounded-xl bg-zinc-900 text-white py-2.5 text-sm font-medium hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="
+          w-full rounded-xl
+          bg-primary
+          text-primary-foreground
+          py-2.5 text-sm font-semibold
+          transition hover:bg-primary/90
+          disabled:opacity-50 disabled:cursor-not-allowed
+        "
       >
         {mutation.isPending ? "Creando..." : "Crear producto"}
       </button>
 
       {mutation.isError && (
-        <p className="text-sm text-red-600">
+        <p className="text-sm text-destructive">
           Error creando el producto. Si el SKU ya existe, cambia el SKU.
         </p>
       )}

@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -35,49 +36,48 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pageLabel = pathname.split("/").slice(2).join(" / ") || "dashboard";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100">
+    <div className="min-h-screen bg-background text-foreground">
       {/* SIDEBAR */}
       <aside
         className={[
           "fixed inset-y-0 left-0 z-50",
           "bg-card border-r border-border",
-          "backdrop-blur-xl",
           "transition-all duration-300",
           sidebarW,
         ].join(" ")}
       >
         {/* Brand + Toggle */}
-        <div className="h-16 flex items-center justify-between px-4">
+        <div className="h-16 flex items-center justify-between px-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-primary text-primary-foreground shadow-md grid place-items-center text-sm font-semibold shadow-sm">
+            <div className="h-9 w-9 rounded-2xl bg-primary text-primary-foreground grid place-items-center text-sm font-semibold">
               T
             </div>
 
             {!collapsed && (
               <div className="leading-tight">
-                <div className="font-semibold text-zinc-900">Trendia Admin</div>
-                <div className="text-xs text-zinc-500">Ecommerce</div>
+                <div className="font-semibold tracking-tight">
+                  Trendia Admin
+                </div>
+                <div className="text-xs text-muted-foreground">Ecommerce</div>
               </div>
             )}
           </div>
 
-          {/* BOTÓN COLAPSAR */}
           <button
             type="button"
             onClick={() => setCollapsed((v) => !v)}
-            className="h-9 w-9 rounded-lg hover:bg-zinc-100 transition grid place-items-center cursor-pointer"
-            aria-label={collapsed ? "Expandir sidebar" : "Colapsar sidebar"}
+            className="h-9 w-9 rounded-lg hover:bg-muted transition grid place-items-center"
           >
             {collapsed ? (
-              <ChevronRight className="h-4 w-4 text-zinc-700" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             ) : (
-              <ChevronLeft className="h-4 w-4 text-zinc-700" />
+              <ChevronLeft className="h-4 w-4 text-muted-foreground" />
             )}
           </button>
         </div>
 
         {/* NAV */}
-        <nav className="px-3 py-4 space-y-1">
+        <nav className="px-3 py-6 space-y-1">
           {items.map((it) => {
             const active = pathname === it.href;
             const Icon = it.icon;
@@ -87,23 +87,22 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 href={it.href}
                 key={it.href}
                 className={[
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-smooth",
                   active
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                    : "text-muted-foreground hover:bg-primary/5 hover:text-primary",
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   collapsed ? "justify-center" : "",
                 ].join(" ")}
               >
                 <Icon
-                  className={`h-5 w-5 transition-colors ${
-                    active ? "text-primary-foreground" : "text-muted-foreground"
+                  className={`h-5 w-5 ${
+                    active ? "text-primary" : "text-muted-foreground"
                   }`}
                 />
                 {!collapsed && <span className="font-medium">{it.name}</span>}
               </Link>
             );
 
-            // Tooltip solo cuando está colapsado
             return collapsed ? (
               <Tooltip key={it.href} text={it.name}>
                 {link}
@@ -114,37 +113,38 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
           {!collapsed ? (
-            <div className="text-xs text-zinc-500">v0.1 • Ecommerce Admin</div>
+            <div className="text-xs text-muted-foreground">
+              v0.1 • Ecommerce Admin
+            </div>
           ) : (
-            <div className="text-[10px] text-zinc-500 text-center">v0.1</div>
+            <div className="text-[10px] text-muted-foreground text-center">
+              v0.1
+            </div>
           )}
         </div>
       </aside>
 
       {/* CONTENT */}
-      <div className={[contentPL, "transition-all duration-200"].join(" ")}>
+      <div className={[contentPL, "transition-all duration-300"].join(" ")}>
         {/* HEADER */}
-        <header className="h-16 bg-white/70 backdrop-blur-xl border-b border-zinc-200 flex items-center justify-between px-6">
+        <header className="h-16 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8">
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-zinc-500">Ecommerce</span>
-            <span className="text-zinc-300">/</span>
-            <span className="font-medium text-zinc-900 capitalize">
+            <span className="text-muted-foreground">Ecommerce</span>
+            <span className="text-muted-foreground/50">/</span>
+            <span className="font-semibold capitalize tracking-tight">
               {pageLabel}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <div
-              className="h-9 w-9 rounded-full bg-zinc-200 hover:bg-zinc-300 transition cursor-pointer"
-              title="Perfil"
-            />
+            <div className="h-9 w-9 rounded-full bg-muted hover:bg-secondary transition cursor-pointer" />
+            <ThemeToggle />
           </div>
         </header>
 
-        <main className="p-6 lg:p-8">{children}</main>
+        <main className="p-8">{children}</main>
       </div>
     </div>
   );

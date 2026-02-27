@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -23,22 +22,19 @@ interface OrderColumnsProps {
 export function orderColumns({
   onAssignPrice,
   onView,
-}: OrderColumnsProps): ColumnDef<Order, any>[] {
+}: OrderColumnsProps): ColumnDef<Order>[] {
   return [
     {
       accessorKey: "fullName",
       header: "Cliente",
       cell: ({ row }) => {
         const order = row.original;
-
         return (
           <div className="flex flex-col">
-            <span className="font-semibold text-foreground tracking-tight">
+            <span className="font-semibold text-foreground">
               {order.fullName}
             </span>
-            <span className="text-xs text-muted-foreground">
-              {order.phone}
-            </span>
+            <span className="text-xs text-muted-foreground">{order.phone}</span>
           </div>
         );
       },
@@ -48,7 +44,6 @@ export function orderColumns({
       header: "Producto",
       cell: ({ row }) => {
         const order = row.original;
-
         return (
           <div className="flex flex-col">
             <span className="font-medium text-foreground">
@@ -62,29 +57,6 @@ export function orderColumns({
       },
     },
     {
-      id: "address",
-      header: "Dirección",
-      cell: ({ row }) => {
-        const order = row.original;
-
-        return (
-          <div className="flex flex-col text-sm">
-            <span className="font-medium text-foreground">
-              {order.address}
-            </span>
-            <span className="text-muted-foreground">
-              {order.city}, {order.department}
-            </span>
-            {order.addressDetails && (
-              <span className="text-xs text-muted-foreground/80">
-                {order.addressDetails}
-              </span>
-            )}
-          </div>
-        );
-      },
-    },
-    {
       accessorKey: "status",
       header: "Estado",
       cell: ({ row }) => {
@@ -93,14 +65,14 @@ export function orderColumns({
         return (
           <span
             className="
-              inline-flex items-center gap-1.5
-              rounded-full
-              bg-primary/10
-              px-3 py-1
-              text-xs font-medium
-              text-primary
-              border border-primary/20
-            "
+            inline-flex items-center gap-1.5
+            rounded-full
+            bg-primary/10
+            px-3 py-1
+            text-xs font-medium
+            text-primary
+            border border-primary/20
+          "
           >
             <span className="h-2 w-2 rounded-full bg-primary" />
             {status}
@@ -114,9 +86,9 @@ export function orderColumns({
       cell: ({ row }) => {
         const price = row.original.unitSalePrice;
 
-        if (price === null || price === undefined) {
+        if (!price) {
           return (
-            <div className="text-right text-xs font-medium text-amber-600">
+            <div className="text-right text-xs font-medium text-destructive">
               Sin asignar
             </div>
           );
@@ -136,18 +108,14 @@ export function orderColumns({
         const profit = row.original.profit;
 
         if (profit === null || profit === undefined) {
-          return (
-            <div className="text-right text-muted-foreground">-</div>
-          );
+          return <div className="text-right text-muted-foreground">-</div>;
         }
 
         return (
           <div
             className={[
               "text-right font-semibold tabular-nums",
-              profit >= 0
-                ? "text-emerald-600"
-                : "text-destructive",
+              profit >= 0 ? "text-success" : "text-destructive",
             ].join(" ")}
           >
             {money(profit)}
@@ -170,42 +138,30 @@ export function orderColumns({
       cell: ({ row }) => {
         const order = row.original;
 
+        const btn =
+          "inline-flex h-9 w-9 items-center justify-center rounded-xl " +
+          "border border-border bg-background text-muted-foreground " +
+          "transition hover:bg-muted active:scale-[0.95]";
+
         return (
           <div className="flex items-center gap-2 justify-end">
-            {/* VER DETALLE */}
             <button
               onClick={() => onView(order)}
-              className="
-                inline-flex h-9 w-9 items-center justify-center
-                rounded-xl
-                border border-border
-                bg-background
-                text-muted-foreground
-                transition-all duration-200
-                hover:bg-primary/5
-                hover:text-primary
-                hover:border-primary/30
-                hover:shadow-sm
-                active:scale-[0.95]
-              "
+              className={btn}
               title="Ver detalle"
             >
               <Eye className="h-4 w-4" />
             </button>
 
-            {/* ASIGNAR PRECIO */}
             {!order.unitSalePrice && (
               <button
                 onClick={() => onAssignPrice(order)}
                 className="
                   inline-flex h-9 w-9 items-center justify-center
                   rounded-xl
-                  border border-primary/30
-                  bg-primary/10
-                  text-primary
-                  transition-all duration-200
-                  hover:bg-primary/20
-                  hover:shadow-sm
+                  bg-primary
+                  text-primary-foreground
+                  transition hover:bg-primary/90
                   active:scale-[0.95]
                 "
                 title="Asignar precio"

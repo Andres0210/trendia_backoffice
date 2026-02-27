@@ -31,13 +31,18 @@ export default function DashboardHome() {
       positive: true,
     },
   ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-primary">Dashboard</h1>
-        <p className="text-zinc-600">Resumen general del negocio.</p>
+        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">
+          Resumen general del negocio.
+        </p>
       </div>
 
+      {/* KPI GRID */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
@@ -46,39 +51,37 @@ export default function DashboardHome() {
             <div
               key={kpi.label}
               className="
-          relative
-          bg-card
-          border border-border
-          rounded-2xl
-          p-6
-          shadow-sm
-          hover:shadow-lg
-          hover:-translate-y-1
-          transition-all
-          overflow-hidden
-        "
+                bg-card
+                border border-border
+                rounded-2xl
+                p-6
+                card-elevated
+                transition-smooth
+                hover:-translate-y-0.5
+              "
             >
-              {/* Glow background */}
-              <div className="absolute -top-10 -right-10 h-32 w-32 bg-primary/10 rounded-full blur-3xl" />
-
-              {/* Header */}
+              {/* Top Row */}
               <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">{kpi.label}</div>
+                <span className="text-sm text-muted-foreground">
+                  {kpi.label}
+                </span>
 
-                <div className="h-10 w-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                   <Icon className="h-5 w-5" />
                 </div>
               </div>
 
               {/* Value */}
-              <div className="mt-6 text-4xl font-bold text-foreground">
+              <div className="mt-6 text-3xl font-semibold tracking-tight">
                 {kpi.value}
               </div>
 
               {/* Trend */}
               <div
                 className={`mt-3 text-sm font-medium ${
-                  kpi.positive ? "text-green-500" : "text-red-500"
+                  kpi.positive
+                    ? "text-[oklch(0.58_0.16_150)]"
+                    : "text-destructive"
                 }`}
               >
                 {kpi.trend} vs ayer

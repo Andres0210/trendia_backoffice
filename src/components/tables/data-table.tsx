@@ -19,37 +19,63 @@ export function DataTable<TData>({ columns, data }: DataTableProps<TData>) {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const rows = table.getRowModel().rows;
+  if (!data.length) {
+    return (
+      <div className="py-16 text-center text-sm text-muted-foreground">
+        No hay registros para mostrar.
+      </div>
+    );
+  }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-zinc-50 text-left">
+    <div className="w-full overflow-x-auto">
+      <table className="w-full border-collapse text-sm">
+        {/* HEADER */}
+        <thead className="bg-muted/40">
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b border-zinc-200">
+            <tr key={headerGroup.id} className="border-b border-border">
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-5 py-3 text-xs font-semibold tracking-wide text-zinc-600 uppercase"
+                  className="
+                    px-6 py-3
+                    text-left
+                    font-medium
+                    text-muted-foreground
+                  "
                 >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                 </th>
               ))}
             </tr>
           ))}
         </thead>
 
+        {/* BODY */}
         <tbody>
-          {rows.map((row) => (
+          {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50 transition"
+              className="
+                border-b border-border
+                transition-colors
+                hover:bg-muted/50
+              "
             >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-5 py-4 align-middle">
+                <td
+                  key={cell.id}
+                  className="
+                    px-6 py-4
+                    text-foreground
+                    align-middle
+                  "
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -57,17 +83,6 @@ export function DataTable<TData>({ columns, data }: DataTableProps<TData>) {
           ))}
         </tbody>
       </table>
-
-      {data.length === 0 && (
-        <div className="p-10 text-center">
-          <div className="text-sm font-medium text-zinc-900">
-            No hay productos
-          </div>
-          <div className="text-sm text-zinc-600 mt-1">
-            Crea tu primer producto para verlo aquí.
-          </div>
-        </div>
-      )}
     </div>
   );
 }
