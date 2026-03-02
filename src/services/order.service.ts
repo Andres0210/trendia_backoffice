@@ -31,18 +31,8 @@ export async function assignOrderPrice(
 }
 
 export async function advanceOrderStatus(id: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/order/${id}/status`,
-    {
-      method: "PATCH",
-    },
-  );
-
-  if (!res.ok) {
-    throw new Error("Error updating status");
-  }
-
-  return res.json();
+  const { data } = await api.patch(`/order/${id}/status`);
+  return data;
 }
 
 export async function updateOrderAdminFields(
