@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -11,29 +11,85 @@ import {
   LineChart,
   ChevronLeft,
   ChevronRight,
+  LogOut,
+  MessageSquare,
 } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useMe } from "@/hooks/useMe";
+import { useLogout } from "@/hooks/useLogout";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
 
-  const items = useMemo(
-    () => [
+  const { data: user, isLoading, isError } = useMe();
+  console.log(user);
+  const { mutate: logout, isPending: loggingOut } = useLogout();
+
+  // Si /me falla (token expirado), redirige
+  useEffect(() => {
+    if (isError) {
+      router.replace("/login");
+    }
+  }, [isError, router]);
+
+  // Protección adicional por rol
+  useEffect(() => {
+    if (!user) return;
+
+    if (
+      pathname.startsWith("/dashboard/admins") &&
+      user.role !== "SUPER_ADMIN"
+    ) {
+      router.replace("/dashboard");
+    }
+  }, [pathname, user, router]);
+
+  const items = useMemo(() => {
+    if (!user) return [];
+
+    const base = [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { name: "Productos", href: "/dashboard/products", icon: Package },
-      { name: "Clientes", href: "/dashboard/users", icon: Users },
       { name: "Órdenes", href: "/dashboard/orders", icon: ShoppingCart },
+      {
+        name: "Conversaciones",
+        href: "/dashboard/conversations",
+        icon: MessageSquare,
+      },
+      { name: "Clientes", href: "/dashboard/users", icon: Users },
+      { name: "Productos", href: "/dashboard/products", icon: Package },
+
       { name: "Analytics", href: "/dashboard/analytics", icon: LineChart },
-    ],
-    [],
-  );
+    ];
+
+    if (user.role === "SUPER_ADMIN") {
+      base.push({
+        name: "Administradores",
+        href: "/dashboard/admins",
+        icon: Users,
+      });
+    }
+
+    return base;
+  }, [user]);
 
   const sidebarW = collapsed ? "w-20" : "w-72";
   const contentPL = collapsed ? "pl-20" : "pl-72";
-
   const pageLabel = pathname.split("/").slice(2).join(" / ") || "dashboard";
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-sm text-muted-foreground">
+          Verificando sesión...
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -46,19 +102,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           sidebarW,
         ].join(" ")}
       >
-        {/* Brand + Toggle */}
+        {/* HEADER SIDEBAR */}
         <div className="h-16 flex items-center justify-between px-5 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-2xl bg-primary text-primary-foreground grid place-items-center text-sm font-semibold">
-              T
+              F
             </div>
 
             {!collapsed && (
               <div className="leading-tight">
-                <div className="font-semibold tracking-tight">
-                  Trendia Admin
+                <div className="font-semibold tracking-tight">Fluxen Admin</div>
+                <div className="text-xs text-muted-foreground">
+                  Control Panel
                 </div>
-                <div className="text-xs text-muted-foreground">Ecommerce</div>
               </div>
             )}
           </div>
@@ -87,7 +143,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 href={it.href}
                 key={it.href}
                 className={[
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-smooth",
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
                   active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -113,10 +169,34 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+        {/* FOOTER SIDEBAR */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border space-y-3">
+          {!collapsed && (
+            <div className="text-xs text-muted-foreground">
+              Conectado como <span className="font-medium">{user.role}</span>
+            </div>
+          )}
+
+          <button
+            onClick={() => logout()}
+            disabled={loggingOut}
+            className={[
+              "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
+              "text-red-500 hover:bg-red-500/10",
+              collapsed ? "justify-center" : "",
+            ].join(" ")}
+          >
+            <LogOut className="h-5 w-5" />
+            {!collapsed && (
+              <span className="font-medium">
+                {loggingOut ? "Cerrando..." : "Cerrar sesión"}
+              </span>
+            )}
+          </button>
+
           {!collapsed ? (
             <div className="text-xs text-muted-foreground">
-              v0.1 • Ecommerce Admin
+              v0.1 • Fluxen Admin
             </div>
           ) : (
             <div className="text-[10px] text-muted-foreground text-center">
@@ -128,10 +208,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* CONTENT */}
       <div className={[contentPL, "transition-all duration-300"].join(" ")}>
-        {/* HEADER */}
         <header className="h-16 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8">
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground">Ecommerce</span>
+            <span className="text-muted-foreground">Fluxen</span>
             <span className="text-muted-foreground/50">/</span>
             <span className="font-semibold capitalize tracking-tight">
               {pageLabel}
@@ -139,7 +218,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-full bg-muted hover:bg-secondary transition cursor-pointer" />
             <ThemeToggle />
           </div>
         </header>
