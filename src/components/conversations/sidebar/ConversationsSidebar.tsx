@@ -18,7 +18,6 @@ export default function ConversationsSidebar({
   activeConversation,
   onSelectConversation,
 }: Props) {
-
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
 
@@ -38,7 +37,6 @@ export default function ConversationsSidebar({
 
   return (
     <div className="w-[340px] border-r border-border bg-muted/20 flex flex-col">
-
       {/* HEADER */}
       <div className="p-4 border-b border-border">
         <h2 className="font-semibold text-lg">Inbox</h2>
@@ -55,7 +53,6 @@ export default function ConversationsSidebar({
 
       {/* LISTA */}
       <div className="divide-y overflow-y-auto flex-1">
-
         {isLoading && (
           <div className="p-4 text-sm text-muted-foreground">
             Cargando conversaciones...
@@ -63,12 +60,10 @@ export default function ConversationsSidebar({
         )}
 
         {filtered?.map((conv: any) => {
-
           const name = conv.user?.firstName;
           const phone = conv.user?.phone;
 
-          const lastMessage =
-            conv.messages?.[0]?.textBody || "Sin mensajes";
+          const lastMessage = conv.messages?.[0]?.textBody || "Sin mensajes";
 
           const lastMessageTime = conv.lastMessageAt
             ? new Date(conv.lastMessageAt).toLocaleTimeString([], {
@@ -80,11 +75,11 @@ export default function ConversationsSidebar({
           return (
             <ConversationItem
               key={conv.id}
-              name={name}
-              phone={phone}
-              lastMessage={lastMessage}
-              lastMessageTime={lastMessageTime}
-              unread={conv.unreadCount > 0}
+              name={conv.user?.firstName}
+              phone={conv.user?.phone}
+              lastMessage={conv.lastMessageText}
+              lastMessageTime={conv.lastMessageAt}
+              unreadCount={conv.unreadCount}
               active={activeConversation?.id === conv.id}
               onClick={() => onSelectConversation(conv)}
             />

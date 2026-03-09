@@ -9,6 +9,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import ConversationsSidebar from "@/components/conversations/sidebar/ConversationsSidebar";
 import ChatPanel from "@/components/conversations/chat/ChatPanel";
 import CustomerPanel from "@/components/conversations/customer/CustomerPanel";
+import {
+  markConversationAsRead,
+  sendTextMessage,
+} from "@/services/conversation.service";
+import { useMe } from "@/hooks/useMe";
 
 type Message = {
   id?: string;
@@ -20,11 +25,13 @@ type Message = {
 
 export default function ConversationsPage() {
   const { data: conversations, isLoading } = useConversations();
+  const { data: admin } = useMe();
 
   const [activeConversation, setActiveConversation] = useState<any>(null);
   const [activeConversationId, setActiveConversationId] = useState<
     string | null
   >(null);
+  const [showCustomerPanel, setShowCustomerPanel] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
 
   const [search, setSearch] = useState("");
@@ -39,13 +46,23 @@ export default function ConversationsPage() {
     setMessages(data);
   }
 
+  async function handleSendMessage(text: string) {
+    if (!activeConversation || !admin) return;
+
+    await sendTextMessage({
+      phoneNumber: activeConversation.user.phone,
+      text,
+      adminId: admin.sub,
+    });
+  }
+
   // SOCKET REALTIME
   useEffect(() => {
-    const handleMessage = (msg: Message) => {
+    const handleMessage = async (msg: Message) => {
       if (msg.conversationId === activeConversationId) {
         setMessages((prev) => [...prev, msg]);
+        await markConversationAsRead(msg.conversationId);
       }
-
       queryClient.invalidateQueries({
         queryKey: ["conversations"],
       });
@@ -56,7 +73,7 @@ export default function ConversationsPage() {
     return () => {
       socket.off("new-message", handleMessage);
     };
-  }, [activeConversationId, queryClient]); 
+  }, [activeConversationId, queryClient]);
 
   // FILTRAR CONVERSACIONES
   const filteredConversations = useMemo(() => {
@@ -79,22 +96,33 @@ export default function ConversationsPage() {
     <div className="h-[calc(100vh-120px)] flex bg-card rounded-2xl border border-border overflow-hidden">
       {/* ================= INBOX ================= */}
       <ConversationsSidebar
-        conversations={conversations}
+        conversations={filteredConversations}
         isLoading={isLoading}
         activeConversation={activeConversation}
-        onSelectConversation={(conv) => {
+        onSelectConversation={async (conv) => {
           setActiveConversation(conv);
           setActiveConversationId(conv.id);
           setMessages([]);
-          loadMessages(conv.id);
+          await loadMessages(conv.id);
+          await markConversationAsRead(conv.id);
+          queryClient.invalidateQueries({ queryKey: ["conversations"] });
         }}
       />
-
       {/* ================= CHAT ================= */}
-      <ChatPanel activeConversation={activeConversation} messages={messages} />
 
-      {/* ================= CLIENT PANEL ================= */}
-      <CustomerPanel conversation={activeConversation} />
+      <ChatPanel
+        activeConversation={activeConversation}
+        messages={messages}
+        onSendMessage={handleSendMessage}
+        onToggleCustomerPanel={() => setShowCustomerPanel((prev) => !prev)}
+      />
+
+      {showCustomerPanel && (
+        <CustomerPanel
+          conversation={activeConversation}
+          onClose={() => setShowCustomerPanel(false)}
+        />
+      )}
     </div>
   );
 }

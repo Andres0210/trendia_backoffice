@@ -1,7 +1,10 @@
 import { io } from "socket.io-client";
 
-export const socket = io("https://fluxen.store", {
+export const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL as string, {
   path: "/backend/socket.io",
   transports: ["websocket"],
-  secure: true,
+});
+
+socket.on("connect", () => {
+  console.log("socket conectado", socket.id);
 });

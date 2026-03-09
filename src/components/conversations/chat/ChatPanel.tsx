@@ -8,9 +8,15 @@ import ChatTools from "./ChatTools";
 type Props = {
   activeConversation: any;
   messages: any[];
+  onSendMessage: (text: string) => void;
+  onToggleCustomerPanel: () => void;
 };
-
-export default function ChatPanel({ activeConversation, messages }: Props) {
+export default function ChatPanel({
+  activeConversation,
+  messages,
+  onSendMessage,
+  onToggleCustomerPanel,
+}: Props) {
   if (!activeConversation) {
     return (
       <div className="flex-1 flex items-center justify-center text-muted-foreground">
@@ -21,15 +27,16 @@ export default function ChatPanel({ activeConversation, messages }: Props) {
 
   return (
     <div className="flex-1 flex flex-col">
-      <ChatHeader conversation={activeConversation} />
+      <ChatHeader
+        conversation={activeConversation}
+        onToggleCustomerPanel={onToggleCustomerPanel}
+      />
 
       <ChatMessages messages={messages} />
 
       <ChatInput
-       conversationId={activeConversation?.id || null}
-        onSend={(text) => {
-          console.log("mensaje a enviar:", text);
-        }}
+        conversationId={activeConversation?.id || null}
+        onSend={(text) => onSendMessage(text)}
       />
     </div>
   );

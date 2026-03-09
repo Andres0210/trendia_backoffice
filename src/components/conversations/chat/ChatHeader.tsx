@@ -2,19 +2,23 @@
 
 type Props = {
   conversation: any;
+  onToggleCustomerPanel: () => void;
 };
 
-export default function ChatHeader({ conversation }: Props) {
+export default function ChatHeader({
+  conversation,
+  onToggleCustomerPanel,
+}: Props) {
   const name =
-    conversation?.user?.firstName ||
-    conversation?.user?.phone ||
-    "Cliente";
+    conversation?.user?.firstName || conversation?.user?.phone || "Cliente";
 
   const phone = conversation?.user?.phone;
 
   return (
-    <div className="border-b border-border p-4 flex items-center justify-between">
-
+    <div
+      className="border-b border-border p-4 flex items-center justify-between cursor-pointer"
+      onClick={onToggleCustomerPanel}
+    >
       <div className="flex items-center gap-3">
         {/* Avatar */}
         <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-semibold">
@@ -28,10 +32,7 @@ export default function ChatHeader({ conversation }: Props) {
       </div>
 
       {/* Aquí irán luego los botones */}
-      <div className="flex gap-2">
-        {/* Placeholder */}
-      </div>
-
+      <div className="flex gap-2">{/* Placeholder */}</div>
     </div>
   );
 }

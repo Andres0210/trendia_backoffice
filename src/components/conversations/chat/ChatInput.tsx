@@ -32,6 +32,12 @@ export default function ChatInput({ conversationId, onSend }: Props) {
         <input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
           placeholder="Escribe un mensaje..."
           className="flex-1 bg-transparent outline-none text-sm px-2"
         />
