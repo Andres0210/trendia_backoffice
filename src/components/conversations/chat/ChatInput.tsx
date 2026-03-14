@@ -1,8 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
 import { useState } from "react";
 import { Send } from "lucide-react";
 import ChatTools from "./ChatTools";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   conversationId: string | null;
@@ -15,40 +17,41 @@ export default function ChatInput({ conversationId, onSend }: Props) {
   function handleSend() {
     if (!message.trim()) return;
 
-    onSend(message);
-
+    onSend(message.trim());
     setMessage("");
   }
 
   if (!conversationId) return null;
 
   return (
-    <div className="border-t border-border bg-background p-3">
-      <div className="flex items-center gap-2 bg-muted rounded-full px-3 py-2">
-        {/* ICONOS DE HERRAMIENTAS */}
+    <div className="border-t border-border bg-background px-4 py-3">
+      <div className="flex items-end gap-2 bg-muted/50 border border-border rounded-2xl px-3 py-2 shadow-sm">
+        {/* HERRAMIENTAS */}
         <ChatTools conversationId={conversationId} />
 
         {/* INPUT */}
-        <input
+        <Textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          placeholder="Escribe un mensaje..."
+          rows={1}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               handleSend();
             }
           }}
-          placeholder="Escribe un mensaje..."
-          className="flex-1 bg-transparent outline-none text-sm px-2"
+          className="flex-1 resize-none border-0 bg-transparent focus-visible:ring-0 text-sm px-2 py-1"
         />
 
         {/* BOTON ENVIAR */}
-        <button
+        <Button
           onClick={handleSend}
-          className="p-2 rounded-full hover:bg-muted transition"
+          size="icon"
+          className="rounded-full h-9 w-9"
         >
           <Send size={18} />
-        </button>
+        </Button>
       </div>
     </div>
   );

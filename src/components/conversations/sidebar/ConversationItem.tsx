@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
 interface Props {
   name?: string;
   phone: string;
@@ -10,7 +12,7 @@ interface Props {
   onClick: () => void;
 }
 
-function formatLastMessageTime(timestamp: string, unreadCount: number) {
+function formatLastMessageTime(timestamp: string) {
   const date = new Date(timestamp);
   const now = new Date();
 
@@ -27,22 +29,16 @@ function formatLastMessageTime(timestamp: string, unreadCount: number) {
     date.getMonth() === yesterday.getMonth() &&
     date.getFullYear() === yesterday.getFullYear();
 
-  let formatted = "";
-
   if (isToday) {
-    // Mostrar hora en formato 12h
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "p.m." : "a.m.";
-    const h12 = hours % 12 === 0 ? 12 : hours % 12;
-    formatted = `${h12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
-  } else if (isYesterday) {
-    formatted = "ayer";
-  } else {
-    formatted = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    return date.toLocaleTimeString("es-CO", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
-  return formatted;
+  if (isYesterday) return "Ayer";
+
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 }
 
 export default function ConversationItem({
@@ -55,43 +51,64 @@ export default function ConversationItem({
   onClick,
 }: Props) {
   const displayName = name || phone;
-  const avatarLetter = name ? name.charAt(0).toUpperCase() : "";
+  const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <div
       onClick={onClick}
-      className={`flex gap-3 p-3 border-b border-border cursor-pointer transition hover:bg-muted/70 ${
-        active ? "bg-muted/80" : ""
-      }`}
+      className={cn(
+        "flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-b",
+        "hover:bg-muted/60",
+        active && "bg-muted",
+      )}
     >
       {/* Avatar */}
-      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted text-sm font-semibold">
+      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-semibold">
         {avatarLetter}
       </div>
 
-      {/* Info */}
+      {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-center">
-          <span className="font-medium truncate text-foreground">
+        {/* Top row */}
+        <div className="flex items-center justify-between">
+          <span
+            className={cn(
+              "truncate text-sm",
+              unreadCount > 0
+                ? "font-semibold text-foreground"
+                : "font-medium text-foreground",
+            )}
+          >
             {displayName}
           </span>
 
           <span
-            className={`text-xs ${
-              unreadCount > 0 ? "text-green-500" : "text-muted-foreground"
-            }`}
+            className={cn(
+              "text-xs",
+              unreadCount > 0
+                ? "text-green-600 font-medium"
+                : "text-muted-foreground",
+            )}
           >
-            {formatLastMessageTime(lastMessageTime, unreadCount)}
+            {formatLastMessageTime(lastMessageTime)}
           </span>
         </div>
 
-        <div className="flex justify-between items-center">
-          <p className="text-sm text-muted-foreground truncate">
+        {/* Bottom row */}
+        <div className="flex items-center justify-between mt-0.5">
+          <p
+            className={cn(
+              "text-sm truncate",
+              unreadCount > 0
+                ? "text-foreground font-medium"
+                : "text-muted-foreground",
+            )}
+          >
             {lastMessage}
           </p>
 
           {unreadCount > 0 && (
-            <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+            <span className="ml-2 min-w-[20px] h-5 px-1 flex items-center justify-center text-xs font-medium bg-green-500 text-white rounded-full">
               {unreadCount}
             </span>
           )}
