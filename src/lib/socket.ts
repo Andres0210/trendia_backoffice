@@ -8,3 +8,4 @@ export const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL as string, {
 socket.on("connect", () => {
   console.log("socket conectado", socket.id);
 });
+ 

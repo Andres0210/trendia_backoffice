@@ -14,3 +14,20 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+        {},
+        { withCredentials: true },
+      );
+
+      return api(error.config);
+    }
+
+    return Promise.reject(error);
+  },
+);
